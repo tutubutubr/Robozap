@@ -36,7 +36,7 @@ def nao_grupo():
         pyautogui.scroll(-86)
 
 
-pytesseract.pytesseract.tesseract_cmd = "C:/Users/arthu/Desktop/Tesseract/tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "C:/Users/Username/Desktop/Tesseract/tesseract.exe"
 i = 1
 
 print('Solta o mouse')

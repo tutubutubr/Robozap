@@ -1,0 +1,95 @@
+import pyautogui
+import time
+from pynput import mouse
+import cv2 as cv
+import pytesseract
+import keyboard
+from docx import Document
+import re
+
+
+def captura_contatos():
+        pyautogui.rightClick(500,120) # botão direito no grupo
+        time.sleep(0.75)
+        pyautogui.click(610,460) # abre o inspecionar/html 
+        time.sleep(2)
+        pyautogui.hotkey('ctrl', 'c') # copia os contatos
+        time.sleep(0.75)
+        pyautogui.click(1345,150) # fecha o inspecionar/html
+        time.sleep(0.75)
+        pyautogui.hotkey('ctrl', '2') # clica na segunda aba 
+        time.sleep(0.75)
+        pyautogui.hotkey('ctrl', 'v') # copia os contatos
+        time.sleep(0.75)
+        pyautogui.press('enter')
+        time.sleep(0.5)
+        pyautogui.press('enter')
+        time.sleep(0.5)
+        pyautogui.hotkey('ctrl', '1') # clica na primeira aba 
+        time.sleep(0.75)
+        pyautogui.moveTo(295,275,1) # vai pra parte dos contatos 
+        time.sleep(0.75)
+        pyautogui.scroll(-86) # scrolla pra baixo
+def nao_grupo():
+        pyautogui.moveTo(295,275,0.3)
+        time.sleep(1)
+        pyautogui.scroll(-86)
+
+
+pytesseract.pytesseract.tesseract_cmd = "C:/Users/arthu/Desktop/Tesseract/tesseract.exe"
+i = 1
+
+print('Solta o mouse')
+time.sleep(1)
+pyautogui.hotkey('alt', 'tab')
+time.sleep(0.5)
+
+while i <= 2: 
+        pyautogui.click(160,275) # contato 1
+        time.sleep(0.7)
+        pyautogui.click(550,100) # info do contato
+        time.sleep(0.7)
+        im = pyautogui.screenshot(region=(960, 360, 400, 120))
+        im.save("Image.png")
+        time.sleep(0.5)
+        img = cv.imread("Image.png")
+        time.sleep(0.3)
+        res = pytesseract.image_to_string(img)
+        if "Grupo" in res: 
+                print('É grupo\n Iniciando processo de captura de contatos')
+                captura_contatos()
+                im_ctt = pyautogui.screenshot(region=(10, 665, 380, 45))
+                im_ctt.save("final_ctt.png")
+                time.sleep(0.5)
+                img_ctt = cv.imread("final_ctt.png")
+                time.sleep(0.5)
+                res_ctt = pytesseract.image_to_string(img_ctt)
+                if "suas mensagens pessoais" in res_ctt:
+                        i = i + 1
+                else:
+                        i = i + 0
+        else: 
+                print('Não é grupo')
+                im = pyautogui.screenshot(region=(960, 360, 400, 100))
+                im.save("contato_solto.png")
+                ctt_solto = cv.imread("contato_solto.png")
+                res_solto = pytesseract.image_to_string(ctt_solto)
+                texto_limpo = re.sub(r'\s(?!\S)', '', res_solto)
+                letters = ' '.join(re.findall(r'[a-zA-Z]+', texto_limpo))
+                numbers = ' '.join(re.findall(r'[0-9]+', texto_limpo))
+                texto_ordenado = letters + '\n' + numbers
+                with open('base3.csv', 'a', encoding='utf-8') as arquivo:
+                        arquivo.write(texto_ordenado + '\n')
+                doc = Document()
+                doc.add_paragraph(texto_ordenado)
+                nao_grupo()
+                im_ctt = pyautogui.screenshot(region=(10, 665, 380, 45))
+                im_ctt.save("final_ctt.png")
+                time.sleep(0.5)
+                img_ctt = cv.imread("final_ctt.png")
+                time.sleep(0.5)
+                res_ctt = pytesseract.image_to_string(img_ctt)
+                if "suas mensagens pessoais" in res_ctt:
+                        i = i + 1
+                else:
+                        i = i + 0
